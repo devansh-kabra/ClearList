@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>DoneIt</title>
+
+        <!-- fonts -->
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+
+        <!-- css -->
+        <style>
+            html {
+                font-size: clamp(6px, 1vw, 16px);
+            }
+
+            body {
+                background: linear-gradient(0deg, #a683e3 , #e4e9fd );
+                margin: 0;
+                height: 100vh;
+                width: 100vw;
+                overflow: hidden;
+                text-align: center;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+            }
+
+            h1, h2, button {
+                font-family: 'Montserrat', 'sans-serif';
+                
+            }
+
+            h1 {
+                font-size: 20rem;
+                color: #8351cd;
+                text-shadow: 0.0125em 0.0125em 0 white;
+                margin: 0;
+                line-height: 0.9;
+                height: fit-content;
+            }
+
+            h2 {
+                font-size: 2rem;
+                font-weight: 700;
+                width: fit-content;
+
+                margin-top: 0;
+                margin-bottom: 0.5em;
+
+                color: white;
+                background-color: #8351cd;
+                padding: 0 0.15625em;
+            }
+
+            div {
+                display: flex;
+                width: 20.8rem;
+                justify-content: space-around;
+            }
+
+            button {
+                font-size: 1.25rem;
+                width: 8rem;
+                border: 0.125rem solid #8351cd;
+                border-radius: 0.5rem;
+                background-color: white;
+                text-align: center;
+            }
+
+            button:hover {
+                background-color: #8351cd;
+                color: white;
+            }
+
+            button:active {
+                transform: scale(0.98);
+                background-color: #8351cd
+            }
+
+            @media (max-width: 480px) {
+                h1 {
+                    font-size: clamp(50px ,18.75vw,90px);
+                    line-height: 1;
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <h1>DoneIt</h1>
+        <h2>Plan It. Do It. Done.</h2>
+        <div>
+            <a href="/register">
+                <button type="submit" id="register-btn">Register</button>
+            </a>
+            <a href="/login">
+                <button type="submit" id="login-btn">Login</button>
+            </a>
+        </div>
+    </body>
+</html>
