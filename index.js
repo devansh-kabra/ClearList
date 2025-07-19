@@ -34,6 +34,9 @@ const db = new pg.Client({
     database: process.env.DB_DATABASE,
     password: process.env.DB_PASSWORD,
     port: process.env.DB_PORT,
+    ssl: {
+        rejectUnauthorized: false,
+    }
 });
 
 db.connect();
@@ -100,7 +103,22 @@ app.get("/logout", (req, res) => {
         }
         res.redirect("/login");
     })
-})
+});
+
+//get logout popup
+app.get("/logoutpopup", (req, res) => {
+    res.render("partials/popups/logout.ejs");
+});
+
+//get deleteuser popup
+app.get("/deleteuserpopup", (req, res) => {
+    res.render("partials/popups/delete_user.ejs");
+});
+
+//get newtask popup
+app.get("/newtaskpopup", (req, res) => {
+    res.render("partials/popups/newtask.ejs");
+});
 
 //registering new user
 app.post("/register", async (req,res) => {
@@ -151,20 +169,21 @@ app.post("/login", async (req,res) => {
 
 //ading new tasks
 app.post("/newtask", async (req,res) => {
-    const newTask = req.body.newTask;
-    const user_id = req.query.user;
-    const today = new Date();
+    const newTask = req.body.task;
+    const user_id = req.session.user_id;
+    const deadline = req.body.date;
 
     try {
         const addTask = await db.query("INSERT INTO tasks (user_id, task, deadline) VALUES ($1, $2, $3)", 
-            [user_id, newTask, today.toISOString().split("T")[0]]
+            [user_id, newTask, deadline]
         );
-        res.redirect(`/tasks`);
+        res.redirect("/tasks");
     } catch (err) {
         console.error("Error: ", err.stack);
     }
 });
 
+//editing tasks
 app.put("/edittask", async (req,res) => {
     const id = Number(req.body.id);
     const newTask = req.body.task;
@@ -178,9 +197,8 @@ app.put("/edittask", async (req,res) => {
 });
 
 
-
 //deleting completed tasks
-app.delete("/", async (req,res) => {
+app.delete("/deletetask", async (req,res) => {
     let id = Number(req.body.id);
     try {
         const update = await db.query("DELETE FROM tasks WHERE id = $1", [id]);

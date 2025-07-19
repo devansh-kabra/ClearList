@@ -1,33 +1,16 @@
 <%- include("partials/header.ejs") %>
 <body>
-    <div id="logout-popup" class="hide popup">
-        <form method="get" action="/logout" id="logout-form" class="popup-container">
-            <p>Are you sure you want to Logout?</p>
-            <div>
-                <button type="button" id="cancel-logout" class="cancel-popup">No</button>
-                <button type="submit" id="do-logout" class="use-popup">Yes</button>
-            </div>
-        </form>
-    </div>
-    <div id="delete-popup" class="hide popup">
-        <div id="delete-permanent" class="popup-container">
-            <p>
-                Are you sure you want to Delete Permanently?
-                <br/>
-                <span class="warning">This can't be undone!</span>
-            </p>
-            <div>
-                <button type="button" id="cancel-delete" class="cancel-popup">No</button>
-                <button type="button" id="do-delete" class="use-popup">Yes</button>
+    <div id="menu">
+        <div id="settings">
+            <span class="material-symbols-outlined" title="settings">settings</span>
+            <!-- write here the hidden buttons which get enabled when settings button is clicked-->
+            <div id="settings-opt">
+                <button id="logout">Logout</button>
+                <button id="delete-user">Delete Permanently</button>
             </div>
         </div>
-    </div>
-    <div id="settings">
-        <span class="material-symbols-outlined" title="settings">settings</span>
-        <!-- write here the hidden buttons which get enabled when settings button is clicked-->
-        <div id="settings-opt">
-            <button id="logout">Logout</button>
-            <button id="delete-user">Delete Permanently</button>
+        <div id="newtask" title="new task">
+            <span class="material-symbols-outlined add">add</span>
         </div>
     </div>
     <div id="container">
@@ -49,151 +32,14 @@
                 </div>
                 <hr id="hr-<%= task.id %>"/>
             <% }); %>
-            <form action="/newtask?user=<%- user_id %>" method="post">
+            <!-- <form action="/newtask" method="post">
                 <input type="text" name="newTask" id="newTask" autofocus placeholder="New Task" required>
                 <button type="submit" id="newTask-btn">
                     <span class="material-symbols-outlined add">add</span>
                 </button>
-            </form>
+            </form> -->
         </div>
     </div>
-    <script>
-        //keeping track of totalTasks for styling purposes
-        let totalTasks = Number("<%= tasks.length %> ");
-        if (totalTasks === 0) {
-            document.querySelector("#all-tasks > form").style.marginTop = "0.25rem";
-        }
-
-        //function to delete completed tasks
-        async function taskcompleted(Id) {
-            const div = document.querySelector(`#div-${Id}`);
-            const hr = document.querySelector(`#hr-${Id}`);
-
-            div.classList.add("fade-off");
-            hr.classList.add("fade-off");
-
-            div.addEventListener('animationend', () => {
-                div.classList.add("hide");
-                hr.classList.add("hide");
-            });
-
-            try {
-                const update = await fetch("/", {
-                    method: "DELETE",
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        id: Id
-                    })
-                });
-                totalTasks--;
-                if (totalTasks === 0) {
-                    document.querySelector("#all-tasks > form").style.marginTop = "0.25rem";
-                }
-
-                console.log("Updated Successfully");
-            } catch(err) {
-                alert("Unable to connect to server");
-                console.error("Error!", err.stack);
-            } 
-        }
-
-        //functions to edit tasks
-        document.querySelectorAll("span.edit").forEach(item => {
-            item.addEventListener("click", (event) => {
-                const Id = Number(event.target.id.split("-")[1]);
-                const div = document.getElementById(`div-${Id}`);
-                const label = document.querySelector(`#div-${Id} > label`);
-                const edit_div = document.getElementById(`edit-div-${Id}`);
-                const edit_input = document.getElementById(`edit-input-${Id}`);
-
-                const prevTask = label.innerText.trim();
-
-                div.classList.add("hide");
-                edit_div.classList.remove("hide");
-
-                edit_input.value = prevTask;
-
-                edit_input.focus();
-            });
-        });
-
-        document.querySelectorAll("span.check").forEach(item => {
-            item.addEventListener("click", async (event) => {
-                const Id = Number(event.target.id.split("-")[1]);
-                const div = document.getElementById(`div-${Id}`);
-                const label = document.querySelector(`#div-${Id} > label`);
-                const edit_div = document.getElementById(`edit-div-${Id}`);
-                const edit_input = document.getElementById(`edit-input-${Id}`);
-
-                const newTask = edit_input.value;
-                label.innerHTML = newTask;
-
-                div.classList.remove("hide");
-                edit_div.classList.add("hide");
-
-                try {
-                    const data_update = await fetch("/edittask", {
-                        method: 'PUT',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({
-                            id: Id,
-                            task: newTask,
-                        })
-                    });
-                } catch(error) {
-                    alert("Unable to Connect to Server");
-                    console.error("Error: ", error.stack);
-                }
-            });
-        });
-
-        //function for the settings button:
-        document.querySelector("div#settings > span").addEventListener("click", () => {
-            svg = document.querySelector("div#settings > span");
-            button_div = document.getElementById("settings-opt");
-
-            svg.classList.toggle("rotate");
-            button_div.classList.toggle("slide-in");
-        });
-
-        //function for logout button:
-        document.getElementById("logout").addEventListener("click", () => {
-            document.getElementById("logout-popup").classList.remove("hide");
-            document.getElementById("container").style.opacity = "0.3";
-        });
-
-        document.getElementById("cancel-logout").addEventListener("click", () => {
-            document.getElementById("logout-popup").classList.add("hide");
-            document.getElementById("container").style.opacity = "1";
-        });
-
-        //function for deleting user permanently
-        document.getElementById("delete-user").addEventListener("click", () => {
-            document.getElementById("delete-popup").classList.remove("hide");
-            document.getElementById("container").style.opacity = "0.3";
-        });
-
-        document.getElementById("cancel-delete").addEventListener("click", () => {
-            document.getElementById("delete-popup").classList.add("hide");
-            document.getElementById("container").style.opacity = "1";
-        });
-
-        document.getElementById("do-delete").addEventListener("click", async () => {
-            try {
-                const result = await fetch("/deleteuser", {
-                    method: "DELETE",
-                    credentials: "include",
-                });
-                window.location.href = "/register";
-            } catch (err) {
-                console.error("Error: ", err.stack);
-            }
-        });
-
-    </script>
+    <script src="tasks.js"></script>
 </body>
 </html>

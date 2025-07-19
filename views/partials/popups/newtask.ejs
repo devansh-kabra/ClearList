@@ -1,0 +1,16 @@
+<div class="popup" id="edittask-popup">
+    <form action="/newtask" method="post" class="popup-container">
+        <div id="task-div">
+            <label for="task">Task</label>
+            <textarea id="task" required autofocus rows="1" cols="20" name="task"></textarea>
+        </div>
+        <div id="date-div">
+            <label for="date">Select Deadline:</label>
+            <input type="date" id="date" name="date" required>
+        </div>
+        <div id="newtask-btn">
+            <button id="cancel-newtask">Cancel</button>
+            <button type="submit" id="save-newtask">Save</button>
+        </div>
+    </form>
+</div>

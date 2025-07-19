@@ -17,6 +17,7 @@
         <style>
             html {
                 font-size: clamp(4px, 1vw + 6px, 16px);
+                height: 100%;
             }
 
             @media (max-width: 300px) {
@@ -27,10 +28,12 @@
 
             body {
                 background: linear-gradient(0deg, #a683e3 , #e4e9fd );
+                background-size: cover;
+                background-repeat: no-repeat;
+                
                 margin: 0;
-                height: 100vh;
+                height: 100dvh;
                 width: 100vw;
-                overflow: hidden;
 
                 display: flex;
                 align-items: center;
