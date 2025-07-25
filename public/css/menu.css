@@ -4,11 +4,11 @@
     justify-content: center;
     gap: 0.75rem;
 
-    padding-top: 1rem;
-    padding-left: 1rem;
     width: fit-content;
 
-
+    position: absolute;
+    top: 1rem;
+    left: 1rem;
 }
 
 /**settings css:**/

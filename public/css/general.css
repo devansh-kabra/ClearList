@@ -1,15 +1,18 @@
 html {
     font-size: clamp(10px, 1vw + 8px, 16px);
+    height: auto;
 }
 
 body {
-    min-height: 100dvh;
+    min-height: 100vh;
     background: linear-gradient(0deg, #a683e3 , #e4e9fd );
-    background-size: cover;
-    background-repeat: no-repeat;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
     
     margin: 0;
-    overflow: hidden;
 }
 
 .hide {

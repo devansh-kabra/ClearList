@@ -1,20 +1,32 @@
-//keeping track of totalTasks for styling purposes
-let totalTasks = Number("<%= tasks.length %> ");
-if (totalTasks === 0) {
-    document.querySelector("#all-tasks > form").style.marginTop = "0.25rem";
-}
+//setting deadline color for dates that have passed already
+const temp = new Date();
+const today = new Date(temp.getFullYear(), temp.getMonth(), temp.getDate());
+
+document.querySelectorAll(".date-div").forEach(element => {
+    const h1 = element.querySelector("h1");
+    const deadline = h1.innerText;
+
+    const [date, month, year] = deadline.split("-").map(Number);
+
+    const deadlineDate = new Date(year, month-1, date);
+    if (deadlineDate < today) {
+        element.style.backgroundColor = "red";
+    }
+    else if (deadlineDate === today) {
+        console.log(reached);
+        h1.innerHTML = `${deadline} (Today)`;
+    }
+});
+
 
 //function to delete completed tasks
 async function taskcompleted(Id) {
     const div = document.querySelector(`#div-${Id}`);
-    const hr = document.querySelector(`#hr-${Id}`);
 
     div.classList.add("fade-off");
-    hr.classList.add("fade-off");
 
     div.addEventListener('animationend', () => {
         div.classList.add("hide");
-        hr.classList.add("hide");
     });
 
     try {
@@ -27,10 +39,6 @@ async function taskcompleted(Id) {
                 id: Id
             })
         });
-        totalTasks--;
-        if (totalTasks === 0) {
-            document.querySelector("#all-tasks > form").style.marginTop = "0.25rem";
-        }
 
         console.log("Updated Successfully");
     } catch(err) {
@@ -103,7 +111,7 @@ document.querySelector("#newtask > span.add").addEventListener("click", async ()
     const html = await newtask_popup.text();
 
     document.body.insertAdjacentHTML("afterbegin", html);
-    document.getElementById("container").style.opacity = "0.3";
+    document.getElementById("all-tasks").style.opacity = "0.3";
 
     //setting limits on date
     const today = new Date();
@@ -127,7 +135,7 @@ document.querySelector("#newtask > span.add").addEventListener("click", async ()
     //cancel button
     document.getElementById("cancel-newtask").addEventListener("click", () => {
         document.getElementById("edittask-popup").remove();
-        document.getElementById("container").style.opacity = "1";
+        document.getElementById("all-tasks").style.opacity = "1";
     });
 });
 
@@ -148,11 +156,11 @@ document.getElementById("logout").addEventListener("click", async () => {
     const html = await logout_popup.text();
 
     document.body.insertAdjacentHTML('afterbegin', html)
-    document.getElementById("container").style.opacity = "0.3";
+    document.getElementById("all-tasks").style.opacity = "0.3";
 
     document.getElementById("cancel-logout").addEventListener("click", () => {
         document.getElementById("logout-popup").remove();
-        document.getElementById("container").style.opacity = "1";
+        document.getElementById("all-tasks").style.opacity = "1";
     });
 
 });
@@ -165,11 +173,11 @@ document.getElementById("delete-user").addEventListener("click", async () => {
     const html = await delete_user_popup.text();
 
     document.body.insertAdjacentHTML("afterbegin", html);
-    document.getElementById("container").style.opacity = "0.3";
+    document.getElementById("all-tasks").style.opacity = "0.3";
 
     document.getElementById("cancel-delete").addEventListener("click", () => {
         document.getElementById("delete-popup").remove();
-        document.getElementById("container").style.opacity = "1";
+        document.getElementById("all-tasks").style.opacity = "1";
     });
 
     document.getElementById("do-delete").addEventListener("click", async () => {

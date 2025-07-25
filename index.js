@@ -1,21 +1,42 @@
 import express from "express";
 import bodyParser from "body-parser";
 import pg from "pg";
+import { types } from "pg";
 import path from "path";
 import { fileURLToPath } from "url";
 import bcrypt from "bcrypt"; //to store passwords
 import dotenv from "dotenv";
-import session from "express-session";
+import * as session from "express-session";
+import connectPgSimple from "connect-pg-simple"; //to store session in postgres
+
 
 const app = express();
 const port = 3000;
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const saltRounds = 10;
+const pgSession = connectPgSimple(session.default);
 
 dotenv.config();
 
-app.use(session({
+const db = new pg.Pool({
+    user: process.env.DB_USER,
+    host: process.env.DB_HOST,
+    database: process.env.DB_DATABASE,
+    password: process.env.DB_PASSWORD,
+    port: process.env.DB_PORT,
+    // ssl: {
+    //     rejectUnauthorized: false,
+    // }
+});
+
+app.use(session.default({
+    store: new pgSession({
+        pool: db,
+        tableName: 'session',
+        createTableIfMissing: true,
+        pruneSessionInterval: 60,
+    }),
     secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
@@ -24,34 +45,46 @@ app.use(session({
         path: "/",
     }
 }));
+
 app.use(express.static("public"));
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(bodyParser.json());
+types.setTypeParser(1082, val => val);
 
-const db = new pg.Client({
-    user: process.env.DB_USER,
-    host: process.env.DB_HOST,
-    database: process.env.DB_DATABASE,
-    password: process.env.DB_PASSWORD,
-    port: process.env.DB_PORT,
-    ssl: {
-        rejectUnauthorized: false,
-    }
-});
 
-db.connect();
+//structure of tasks make it:
+// task = {
+//     date1 = [{id, task},....................]
+//     date2 = [{id, task},....................]
+// }
 
-//function to get all tasks of the user in date-wise
+function convertDate(date) {
+    const year = date.split("-")[0];
+    const month = date.split("-")[1];
+    const day = date.split("-")[2];
+
+    return `${day}-${month}-${year}`
+}
+
 async function getAllTasks(user_id) {
-    let tasks = [];
+    let tasks = {};
 
     try {
         const allTasks = await db.query("SELECT * FROM tasks WHERE user_id = $1 ORDER BY deadline ASC", [user_id]);
+        
         allTasks.rows.forEach(task => {
-            tasks.push(task);
+            const date = convertDate(task.deadline);
+            if (!tasks[date]) {
+                tasks[date] = [];
+            }
+            
+            tasks[date].push({
+                id: task.id,
+                task: task.task,
+            });
         });
-    } catch (err) {
-        console.error("Cannot retrieve info from the database" ,err.stack);
+    } catch(err) {
+        console.error("Error: ", err.stack);
     }
 
     return tasks;
@@ -89,7 +122,8 @@ app.get("/login", checkNotAuthenticated, (req,res) => {
 app.get("/tasks", checkAuthenticated, async (req,res) => {
     try {
         const allTasks = await getAllTasks(req.session.user_id);
-        res.render("tasks.ejs", {user_id: req.session.user_id, tasks: allTasks});
+        const deadlines = Object.keys(allTasks);
+        res.render("tasks.ejs", {tasks: allTasks, dates: deadlines});
     } catch (err) {
         console.error("Error: ", err.stack);
     }
@@ -172,7 +206,7 @@ app.post("/newtask", async (req,res) => {
     const newTask = req.body.task;
     const user_id = req.session.user_id;
     const deadline = req.body.date;
-
+    console.log(deadline);
     try {
         const addTask = await db.query("INSERT INTO tasks (user_id, task, deadline) VALUES ($1, $2, $3)", 
             [user_id, newTask, deadline]
@@ -219,6 +253,13 @@ app.delete("/deleteuser", async (req, res) => {
     } catch (err) {
         res.status(500).send(err.message || "Internal Server Issue");
     }
+});
+
+//disconnecting with database
+process.on('SIGINT', async () => {
+  console.log('Shutting down...');
+  await db.end(); // 🧹 Gracefully close all DB connections
+  process.exit();
 });
 
 app.listen(port, () => {

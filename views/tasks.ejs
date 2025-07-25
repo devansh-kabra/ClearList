@@ -13,33 +13,32 @@
             <span class="material-symbols-outlined add">add</span>
         </div>
     </div>
-    <div id="container">
-        <div id="title">
-            <h1>Today</h1>
-        </div>
-        <div id="all-tasks">
-            <% tasks.forEach(task => { %>
+    <!-- <div id="container"> -->
+    <div id="all-tasks">
+        <% dates.forEach(date => { %>
+            <div class="date-div" id="<%=date%>">
+                <% if (dates[0] == date) { %>
+                    <h1 class="date" style="border-radius: 0.625rem; margin-top: 0.25rem;"><%= date %></h1>
+                <% } else {%>
+                <h1 class="date"><%= date %></h1>
+                <% } %>
+            </div>
+            <% tasks[date].forEach(task => { %>
                 <div id="edit-div-<%= task.id %>" class="hide">
                     <input type="text" autofocus required id="edit-input-<%= task.id %>">
                     <span class="material-symbols-outlined check" id="check-<%=task.id%>">check</span>
                 </div>
-                <div id="div-<%= task.id %>">
+                <div id="div-<%= task.id %>" class="task-div">
                     <input type="checkbox" id="<%= task.id %>" onchange="taskcompleted(<%= task.id %>)">
                     <label for="<%= task.id %>">
                         <%= task.task %>
                     </label>
                     <span class="material-symbols-outlined edit" id="edit-<%= task.id %>">edit</span>
                 </div>
-                <hr id="hr-<%= task.id %>"/>
-            <% }); %>
-            <!-- <form action="/newtask" method="post">
-                <input type="text" name="newTask" id="newTask" autofocus placeholder="New Task" required>
-                <button type="submit" id="newTask-btn">
-                    <span class="material-symbols-outlined add">add</span>
-                </button>
-            </form> -->
-        </div>
+            <% }) 
+        }) %>
     </div>
+    <!-- </div> -->
     <script src="tasks.js"></script>
 </body>
 </html>
