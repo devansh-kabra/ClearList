@@ -13,22 +13,21 @@
             <span class="material-symbols-outlined add">add</span>
         </div>
     </div>
-    <!-- <div id="container"> -->
     <div id="all-tasks">
         <% dates.forEach(date => { %>
             <div class="date-div" id="<%=date%>">
                 <% if (dates[0] == date) { %>
-                    <h1 class="date" style="border-radius: 0.625rem; margin-top: 0.25rem;"><%= date %></h1>
+                    <h1 class="date" style="margin-top: 0.5rem;"><%= date %></h1>
                 <% } else {%>
                 <h1 class="date"><%= date %></h1>
                 <% } %>
             </div>
             <% tasks[date].forEach(task => { %>
-                <div id="edit-div-<%= task.id %>" class="hide">
-                    <input type="text" autofocus required id="edit-input-<%= task.id %>">
+                <div id="edit-div-<%= task.id %>" class="hide edit-div">
+                    <textarea type="text" autofocus required id="edit-input-<%= task.id %>" class="edit-input"></textarea>
                     <span class="material-symbols-outlined check" id="check-<%=task.id%>">check</span>
                 </div>
-                <div id="div-<%= task.id %>" class="task-div">
+                <div id="div-<%= task.id %>" class="task-div" data-date="<%=date%>">
                     <input type="checkbox" id="<%= task.id %>" onchange="taskcompleted(<%= task.id %>)">
                     <label for="<%= task.id %>">
                         <%= task.task %>
@@ -38,7 +37,9 @@
             <% }) 
         }) %>
     </div>
-    <!-- </div> -->
+    <script id="bootstrap" type="application/json">
+        <%- JSON.stringify({tasks}) %>
+    </script>
     <script src="tasks.js"></script>
 </body>
 </html>

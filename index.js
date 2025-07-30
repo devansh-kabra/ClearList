@@ -25,9 +25,9 @@ const db = new pg.Pool({
     database: process.env.DB_DATABASE,
     password: process.env.DB_PASSWORD,
     port: process.env.DB_PORT,
-    // ssl: {
-    //     rejectUnauthorized: false,
-    // }
+    ssl: {
+        rejectUnauthorized: false,
+    }
 });
 
 app.use(session.default({
@@ -246,10 +246,17 @@ app.delete("/deletetask", async (req,res) => {
 //permanently deleting a user:
 app.delete("/deleteuser", async (req, res) => {
     const user_id = req.session.user_id;
+
     try {
-        const delete_tasks = await db.query("DELETE FROM tasks WHERE user_id = $1", [user_id]);
-        const delete_user = await db.query("DELETE FROM users WHERE id = $1", [user_id]);
-        res.send(204, "Success");
+        req.session.destroy(async (err) => {
+            if (err) {
+                return res.status(500).send("Deletion Failed");
+            } else {
+                const delete_tasks = await db.query("DELETE FROM tasks WHERE user_id = $1", [user_id]);
+                const delete_user = await db.query("DELETE FROM users WHERE id = $1", [user_id]);
+                res.send(204, "Success");
+            }
+        });   
     } catch (err) {
         res.status(500).send(err.message || "Internal Server Issue");
     }

@@ -18,16 +18,41 @@ document.querySelectorAll(".date-div").forEach(element => {
     }
 });
 
+const data = document.getElementById("bootstrap");
+let {tasks} = data ? JSON.parse(data.textContent) : {tasks : []};
+
 
 //function to delete completed tasks
 async function taskcompleted(Id) {
     const div = document.querySelector(`#div-${Id}`);
+    const date = div.dataset.date;
 
     div.classList.add("fade-off");
 
     div.addEventListener('animationend', () => {
         div.classList.add("hide");
     });
+
+    tasks[date] = tasks[date].filter((task) => task.id != Id);
+
+    if (tasks[date].length === 0) {
+        const date_div = document.getElementById(date);
+        date_div.classList.add("fade-off");
+        date_div.addEventListener("animationend", () => {
+            date_div.classList.add("hide");
+        });
+        
+        
+        delete tasks[date];
+        const allDates = Object.keys(tasks);
+
+        if (allDates.length > 0) {
+            document.getElementById(allDates[0]).style.marginTop = "0.5rem";
+        }
+        
+    }
+
+
 
     try {
         const update = await fetch("/deletetask", {
@@ -51,19 +76,28 @@ async function taskcompleted(Id) {
 document.querySelectorAll("span.edit").forEach(item => {
     item.addEventListener("click", (event) => {
         const Id = Number(event.target.id.split("-")[1]);
+        const initial_width = 0.9 * document.getElementById("all-tasks").offsetWidth;
         const div = document.getElementById(`div-${Id}`);
         const label = document.querySelector(`#div-${Id} > label`);
         const edit_div = document.getElementById(`edit-div-${Id}`);
-        const edit_input = document.getElementById(`edit-input-${Id}`);
+        const edit_textarea = document.getElementById(`edit-input-${Id}`);
 
         const prevTask = label.innerText.trim();
-
-        div.classList.add("hide");
         edit_div.classList.remove("hide");
 
-        edit_input.value = prevTask;
+        edit_textarea.value = prevTask;
+        edit_textarea.style.height = label.offsetHeight + "px";
+        edit_textarea.style.width = initial_width + "px";
 
-        edit_input.focus();
+        div.classList.add("hide");
+        
+        edit_textarea.addEventListener("input", () => {
+            edit_textarea.style.height = "auto";
+            edit_textarea.style.height = edit_textarea.scrollHeight + "px";
+        });
+
+        
+        edit_textarea.focus();
     });
 });
 
@@ -73,9 +107,14 @@ document.querySelectorAll("span.check").forEach(item => {
         const div = document.getElementById(`div-${Id}`);
         const label = document.querySelector(`#div-${Id} > label`);
         const edit_div = document.getElementById(`edit-div-${Id}`);
-        const edit_input = document.getElementById(`edit-input-${Id}`);
+        const textarea = document.getElementById(`edit-input-${Id}`);
 
-        const newTask = edit_input.value;
+        const newTask = textarea.value;
+        if (newTask.length === 0) {
+            alert("Task cannot be empty");
+            return;
+        }
+
         label.innerHTML = newTask;
 
         div.classList.remove("hide");
